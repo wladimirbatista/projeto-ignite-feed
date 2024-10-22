@@ -13,13 +13,9 @@ export function Post({ author, publishedAt, content }) {
 
   const [newCommentText, setNewCommentText] = useState("");
 
-  const publishedDateFormatted = format(
-    publishedAt,
-    "d 'de' LLLL 'às' HH:mm'h'",
-    {
-      locale: ptBR,
-    }
-  );
+  const publishedDateFormatted = format(publishedAt,"d 'de' LLLL 'às' HH:mm'h'",{
+    locale: ptBR,
+  });
 
   const publishedDateRelativeToNow = formatDistanceToNow(publishedAt, {
     locale: ptBR,
@@ -33,9 +29,22 @@ export function Post({ author, publishedAt, content }) {
   }
 
   function handleNewCommentChange() {
-    // event.target.setCustomValidity("");
+    event.target.setCustomValidity("");
     setNewCommentText(event.target.value);
   }
+
+  function handleNewCommentInvalid(event) {
+    event.target.setCustomValidity("Esse campo é obrigatório!");
+  }
+
+  function deleteComment(commentToDelete) {
+    const commentsWithoutDeletedOne = comments.filter((comment) => {
+      return comment !== commentToDelete;
+    });
+    setComments(commentsWithoutDeletedOne);
+  }
+
+  const isNewCommentEmpty = newCommentText.length === 0;
 
   return (
     <article className={styles.post}>
@@ -56,7 +65,7 @@ export function Post({ author, publishedAt, content }) {
       </header>
 
       <div className={styles.content}>
-        {content.map((line) =>
+        {content.map((line, index) =>
           line.type === "paragraph" ? (
             <p key={line.content}>{line.content}</p>
           ) : (
@@ -75,24 +84,25 @@ export function Post({ author, publishedAt, content }) {
         <strong>Deixe seu feedback</strong>
         <textarea
           name="comment"
+          placeholder="Escreva um comentário..."
           value={newCommentText}
           onChange={handleNewCommentChange}
-          placeholder="Escreva um comentário..."
+          onInvalid={handleNewCommentInvalid}
+          required
         />
         <footer>
-          <button type="submit">Publicar</button>
+          <button type="submit" disabled={isNewCommentEmpty}>
+            Publicar
+          </button>
         </footer>
       </form>
 
       <div className={styles.commentList}>
-        {/* <Comment />
-        <Comment />
-        <Comment /> */}
         {comments.map((comment) => (
           <Comment
-            key={comment.id}
+            key={comment}
             content={comment}
-            // onDeleteComment={deleteComment}
+            onDeleteComment={deleteComment}
           />
         ))}
       </div>
